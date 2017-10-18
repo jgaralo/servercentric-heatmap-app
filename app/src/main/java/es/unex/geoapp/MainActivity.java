@@ -39,6 +39,7 @@ import java.util.List;
 
 import es.unex.geoapp.datemanager.DatePickerFragment;
 import es.unex.geoapp.locationmanager.LocationManager;
+import es.unex.geoapp.locationmanager.PermissionManager;
 import es.unex.geoapp.model.LocationFrequency;
 
 public class MainActivity extends AppCompatActivity {
@@ -112,12 +113,11 @@ public class MainActivity extends AppCompatActivity {
         tileOverlay = null;
 
 
-        // Start the Nimbees Client user tracking service
-/*        NimbeesClient.getPermissionManager().checkPermissions(this);
+        // check location permission
+        if (PermissionManager.checkPermissions(this, MainActivity.this)){
+            //start the service for tracking
+        }
 
-        if(NimbeesClient.getPermissionManager().getLocationPermissionState(getApplicationContext())){
-            NimbeesClient.getLocationManager().startTracking(60,60);
-        }*/
 
         mTextViewDistance = (TextView) findViewById(R.id.textViewDistance);
         mSlider = (Slider) findViewById(R.id.seekBar);
