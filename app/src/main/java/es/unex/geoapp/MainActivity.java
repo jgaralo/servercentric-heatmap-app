@@ -38,7 +38,9 @@ import java.util.Date;
 import java.util.List;
 
 import es.unex.geoapp.datemanager.DatePickerFragment;
+import es.unex.geoapp.locationmanager.GPSTracker;
 import es.unex.geoapp.locationmanager.LocationManager;
+import es.unex.geoapp.locationmanager.LocationService;
 import es.unex.geoapp.locationmanager.PermissionManager;
 import es.unex.geoapp.model.LocationFrequency;
 
@@ -99,6 +101,11 @@ public class MainActivity extends AppCompatActivity {
      */
     private Circle mCircle;
 
+    /**
+     * Tracking servie
+     */
+    private Intent locationIntent = null;
+
 
     private int startYear=0, startMonth, startDay, startHour, startMinute;
     private int endYear=0, endMonth, endDay, endHour, endMinute;
@@ -113,9 +120,12 @@ public class MainActivity extends AppCompatActivity {
         tileOverlay = null;
 
 
+        if (locationIntent == null) {
+            locationIntent = new Intent(this, LocationService.class);
+        }
         // check location permission
         if (PermissionManager.checkPermissions(this, MainActivity.this)){
-            //start the service for tracking
+            startService(locationIntent);
         }
 
 
@@ -151,9 +161,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onMapReady(GoogleMap googleMap) {
                 mGoogleMap = googleMap;
-                /*if(NimbeesClient.getPermissionManager().getLocationPermissionState(getApplicationContext())){
                     getLocation();
-                }*/
+
 
                 mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                     @Override
@@ -178,18 +187,8 @@ public class MainActivity extends AppCompatActivity {
      * Update the variable mLocation with the location using the Nimbees Location service.
      */
     private void getLocation() {
-        /*NimbeesLocationManager.NimbeesLocationListener mNimbeesLocationListener = new NimbeesLocationManager.NimbeesLocationListener() {
-            @Override
-            public void onGetCurrentLocation(Location location) {
-                mLocation = location;
-                setUpMap();
-            }
-
-            @Override
-            public void onError(NimbeesException e) {
-            }
-        };
-        NimbeesClient.getLocationManager().obtainCurrentLocation(mNimbeesLocationListener);*/
+        GPSTracker gpsTracker = new GPSTracker(this);
+        mLocation = gpsTracker.getLocation();
     }
 
     /**

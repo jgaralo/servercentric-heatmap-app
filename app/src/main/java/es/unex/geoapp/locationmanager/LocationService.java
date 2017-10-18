@@ -15,12 +15,16 @@ import es.unex.geoapp.rest.IPostDataService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
 
 /**
  * Created by Javier on 18/10/2017.
  */
 
 public class LocationService extends Service {
+
+    /** Serve URL*/
+    private String BASE_URL = "";
 
     /**
      * Seconds to send
@@ -33,8 +37,8 @@ public class LocationService extends Service {
 
     PowerManager.WakeLock wakeLock;
 
-    private RestAdapter restAdapter;
-    
+    private Retrofit retrofit;
+
     private IPostDataService rest;
 
     @Override
@@ -51,7 +55,8 @@ public class LocationService extends Service {
         }
         timer = new Timer();
 
-        rest = restAdapter.create(IPostDataService.class);
+        retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
+        rest = retrofit.create(IPostDataService.class);
     }
 
     @Override
