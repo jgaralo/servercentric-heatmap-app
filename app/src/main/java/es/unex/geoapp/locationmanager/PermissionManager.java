@@ -110,6 +110,15 @@ public class PermissionManager {
     }
 
     public static Boolean getLocationPermissionState(Context context) {
-        return Boolean.valueOf(ContextCompat.checkSelfPermission(context, "android.permission.ACCESS_FINE_LOCATION") == 0);
+
+        if (ContextCompat.checkSelfPermission(context,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+
+        return false;
+        //return Boolean.valueOf(ContextCompat.checkSelfPermission(context, "android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED);
+
     }
 }
