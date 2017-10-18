@@ -2,14 +2,10 @@ package es.unex.geoapp.model;
 
 import java.util.Date;
 
-import io.realm.RealmModel;
-import io.realm.annotations.RealmClass;
-
 /**
  * Created by Javier on 13/10/2017.
  */
-@RealmClass
-public class LocationFrequency implements RealmModel {
+public class LocationFrequency {
     Double latitude;
     Double longitude;
     Integer frequency;

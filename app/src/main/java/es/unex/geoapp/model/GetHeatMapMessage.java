@@ -1,4 +1,4 @@
-package es.unex.geoapp.messagemanager;
+package es.unex.geoapp.model;
 
 import java.util.Date;
 
@@ -6,7 +6,7 @@ import java.util.Date;
  * Created by Javier on 10/10/2017.
  */
 
-public class RequestLocationMessage extends  LocationMessage{
+public class GetHeatMapMessage {
 
     Date beginDate;
 
@@ -20,9 +20,7 @@ public class RequestLocationMessage extends  LocationMessage{
 
 
 
-    public RequestLocationMessage(String senderId, Date begin, Date end, double latitude, double longitude, double radius) {
-        this.senderId = senderId;
-        this. kind = NotificationKind.RequestLocation;
+    public GetHeatMapMessage(String senderId, Date begin, Date end, double latitude, double longitude, double radius) {
         beginDate = begin;
         endDate = end;
         this.latitude = latitude;

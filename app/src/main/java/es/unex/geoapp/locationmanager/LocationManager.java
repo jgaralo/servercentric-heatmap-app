@@ -4,9 +4,6 @@ import android.graphics.PointF;
 import android.location.Location;
 import android.util.Log;
 
-import com.nimbees.platform.NimbeesClient;
-import com.nimbees.platform.beans.NimbeesLocation;
-
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -18,8 +15,6 @@ import java.util.List;
 import java.util.TimeZone;
 
 import es.unex.geoapp.model.LocationFrequency;
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
 
 /**
  * Created by Javier on 11/10/2017.
@@ -29,14 +24,8 @@ public class LocationManager {
 
     public static boolean mapFinishedFlag = true;
 
-    public static List<LocationFrequency> getLocationHistory(Date begin, Date end, double latitude, double longitude, double radius){
 
-        List <LocationFrequency> locs = aggreateLocations(
-                filterLocation(convertNimbeesLocations(NimbeesClient.getLocationManager().getLocationHistory(begin, end)), latitude, longitude, radius));
-        return locs;
-    }
-
-    public static List <LocationFrequency> convertNimbeesLocations (List<NimbeesLocation> nimLocs){
+/*    public static List <LocationFrequency> convertNimbeesLocations (List<NimbeesLocation> nimLocs){
         List <LocationFrequency> locationFreqs = new ArrayList<LocationFrequency>();
         for (NimbeesLocation nimLoc: nimLocs ) {
             LocationFrequency lFrequency = new LocationFrequency(nimLoc.getLatitude(), nimLoc.getLongitude(), 1);
@@ -44,7 +33,7 @@ public class LocationManager {
             locationFreqs.add(lFrequency);
         }
         return locationFreqs;
-    }
+    }*/
 
 
 
@@ -147,7 +136,7 @@ public class LocationManager {
         return null;
     }
 
-    public static void storeLocations(List<LocationFrequency> locationList) {
+/*    public static void storeLocations(List<LocationFrequency> locationList) {
         RealmConfiguration config = new RealmConfiguration.Builder()
                 .name("heatmap.realm")
                 .build();
@@ -160,9 +149,9 @@ public class LocationManager {
             realm.commitTransaction();
         }
         realm.close();
-    }
+    }*/
 
-    public static List<LocationFrequency> getLocations() {
+/*    public static List<LocationFrequency> getLocations() {
         LocationManager.mapFinishedFlag=true;
 
         RealmConfiguration config = new RealmConfiguration.Builder()
@@ -185,5 +174,5 @@ public class LocationManager {
         realm.where(LocationFrequency.class).findAll().deleteAllFromRealm();
         realm.commitTransaction();
         realm.close();
-    }
+    }*/
 }

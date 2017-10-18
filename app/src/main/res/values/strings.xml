@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">HeatMap Mobile Centric</string>
+    <string name="app_name">HeatMap Server Centric</string>
     <string name="action_heat_map">Get Heat Map</string>
 </resources>
