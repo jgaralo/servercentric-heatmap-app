@@ -1,4 +1,4 @@
-package es.unex.geoapp;
+package es.unex.heatmapsc;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

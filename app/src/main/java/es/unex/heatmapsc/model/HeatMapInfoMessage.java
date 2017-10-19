@@ -1,4 +1,4 @@
-package es.unex.geoapp.model;
+package es.unex.heatmapsc.model;
 
 import java.util.List;
 

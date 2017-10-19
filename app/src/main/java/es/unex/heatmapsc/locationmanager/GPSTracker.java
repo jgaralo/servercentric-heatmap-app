@@ -1,4 +1,4 @@
-package es.unex.geoapp.locationmanager;
+package es.unex.heatmapsc.locationmanager;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -13,11 +13,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-
-import es.unex.geoapp.MainActivity;
-import es.unex.geoapp.R;
 
 /**
  * Created by Javier on 18/10/2017.
@@ -46,7 +42,7 @@ public class GPSTracker extends Service implements LocationListener {
     }
 
     public Location getLocation() {
-        if (ContextCompat.checkSelfPermission(this,
+        if (ContextCompat.checkSelfPermission(this.context,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             try {

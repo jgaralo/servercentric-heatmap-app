@@ -1,12 +1,10 @@
-package es.unex.geoapp;
+package es.unex.heatmapsc;
 
-import android.accounts.AccountManager;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Handler;
 import android.support.v4.app.DialogFragment;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,8 +14,6 @@ import android.widget.TextView;
 import com.gc.materialdesign.views.ButtonRectangle;
 import com.gc.materialdesign.views.Slider;
 import com.gc.materialdesign.widgets.SnackBar;
-import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -37,12 +33,17 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import es.unex.geoapp.datemanager.DatePickerFragment;
-import es.unex.geoapp.locationmanager.GPSTracker;
-import es.unex.geoapp.locationmanager.LocationManager;
-import es.unex.geoapp.locationmanager.LocationService;
-import es.unex.geoapp.locationmanager.PermissionManager;
-import es.unex.geoapp.model.LocationFrequency;
+import es.unex.heatmapsc.datemanager.DatePickerFragment;
+import es.unex.heatmapsc.locationmanager.GPSTracker;
+import es.unex.heatmapsc.locationmanager.LocationManager;
+import es.unex.heatmapsc.locationmanager.LocationService;
+import es.unex.heatmapsc.locationmanager.PermissionManager;
+import es.unex.heatmapsc.model.GetHeatMapMessage;
+import es.unex.heatmapsc.model.LocationFrequency;
+import es.unex.heatmapsc.rest.IPostDataService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
     /**
@@ -106,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
      */
     private Intent locationIntent = null;
 
+    private IPostDataService rest;
+
 
     private int startYear=0, startMonth, startDay, startHour, startMinute;
     private int endYear=0, endMonth, endDay, endHour, endMinute;
@@ -128,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
             startService(locationIntent);
         }
 
+        rest = IPostDataService.retrofit.create(IPostDataService.class);
 
         mTextViewDistance = (TextView) findViewById(R.id.textViewDistance);
         mSlider = (Slider) findViewById(R.id.seekBar);
@@ -189,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
     private void getLocation() {
         GPSTracker gpsTracker = new GPSTracker(this);
         mLocation = gpsTracker.getLocation();
+        setUpMap();
     }
 
     /**
@@ -274,18 +279,17 @@ public class MainActivity extends AppCompatActivity {
             calendar.set(Calendar.DAY_OF_MONTH, startDay);
             calendar.set(Calendar.HOUR_OF_DAY, startHour);
             calendar.set(Calendar.MINUTE, startMinute);
-            Date startDate = calendar.getTime();
+            final Date startDate = calendar.getTime();
             calendar.clear();
             calendar.set(Calendar.YEAR, endYear);
             calendar.set(Calendar.MONTH, endMonth);
             calendar.set(Calendar.DAY_OF_MONTH, endDay);
             calendar.set(Calendar.HOUR_OF_DAY, endHour);
             calendar.set(Calendar.MINUTE, endMinute);
-            Date endDate = calendar.getTime();
+            final Date endDate = calendar.getTime();
             if(startDate.before(endDate)) {
                 /*nHelper.sendRequestLocationMessage(RADIUS, mLocation, startDate, endDate);*/
                 LocationManager.mapFinishedFlag = false;
-                Log.e("HEATMAP", "MensajeSend");
 
                 final ProgressDialog progressDialog = new ProgressDialog (MainActivity.this);
                 progressDialog.setTitle("HeatMap");
@@ -296,23 +300,12 @@ public class MainActivity extends AppCompatActivity {
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     public void run() {
-                        /*List<LocationFrequency> locations= LocationManager.getLocations();*/
-                        /*List<WeightedLatLng> points= new ArrayList<WeightedLatLng>();
-                        for(LocationFrequency location:locations){
-                            points.add(new WeightedLatLng(new LatLng(location.getLatitude(), location.getLongitude()),location.getFrequency()));
-                        }
-                        if(points.size()>0) {
-                            HeatmapTileProvider mProvider = new HeatmapTileProvider.Builder()
-                                    .weightedData(points)
-                                    .build();
-                            tileOverlay = MainActivity.this.mGoogleMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
-                            if (mCircle != null) {
-                                mCircle.remove();
-                            }
-                        }*/
+
+                        getHeatMapPositions (new GetHeatMapMessage(startDate, endDate, mLocation.getLatitude(), mLocation.getLongitude(), RADIUS));
+
                         progressDialog.dismiss();
                     }
-                }, 20000);
+                }, 1000);
             }
             else{
                 Log.e("HEATMAP", "End date is before star date");
@@ -335,6 +328,40 @@ public class MainActivity extends AppCompatActivity {
             });
             snackbar.show();
         }
+    }
+
+    public void getHeatMapPositions(GetHeatMapMessage heatMapMessage) {
+
+        Call<List<LocationFrequency>> call = rest.getHeatMap(heatMapMessage);
+
+        call.enqueue(new Callback<List<LocationFrequency>>() {
+            @Override
+            public void onResponse(Call<List<LocationFrequency>> call, Response<List<LocationFrequency>> response) {
+
+                List<LocationFrequency> locations = response.body();
+
+                List<WeightedLatLng> points= new ArrayList<WeightedLatLng>();
+                for(LocationFrequency location:locations){
+                    points.add(new WeightedLatLng(new LatLng(location.getLatitude(), location.getLongitude()),location.getFrequency()));
+                }
+                if(points.size()>0) {
+                    HeatmapTileProvider mProvider = new HeatmapTileProvider.Builder()
+                            .weightedData(points)
+                            .build();
+                    tileOverlay = MainActivity.this.mGoogleMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+                    if (mCircle != null) {
+                        mCircle.remove();
+                    }
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<List<LocationFrequency>> call, Throwable t) {
+                Log.e("HEATMAP: ", "ERROR getting the users' locations " + t.getMessage());
+            }
+        });
+
     }
 
 }

@@ -1,32 +1,16 @@
-package es.unex.geoapp.datemanager;
+package es.unex.heatmapsc.datemanager;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
-import android.view.View;
 import android.widget.DatePicker;
 
-import com.gc.materialdesign.widgets.SnackBar;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.TileOverlay;
-import com.google.android.gms.maps.model.TileOverlayOptions;
-import com.google.maps.android.heatmaps.HeatmapTileProvider;
-import com.google.maps.android.heatmaps.WeightedLatLng;
-
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
-import es.unex.geoapp.MainActivity;
-import es.unex.geoapp.locationmanager.LocationManager;
-import es.unex.geoapp.model.LocationFrequency;
+import es.unex.heatmapsc.MainActivity;
 
 public class DatePickerFragment extends DialogFragment
         implements DatePickerDialog.OnDateSetListener {

@@ -1,6 +1,4 @@
-package es.unex.geoapp.model;
-
-import java.util.Date;
+package es.unex.heatmapsc.model;
 
 /**
  * Created by Javier on 13/10/2017.

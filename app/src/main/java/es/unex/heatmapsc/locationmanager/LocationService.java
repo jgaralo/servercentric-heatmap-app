@@ -1,4 +1,4 @@
-package es.unex.geoapp.locationmanager;
+package es.unex.heatmapsc.locationmanager;
 
 import android.app.Service;
 import android.content.Intent;
@@ -10,8 +10,8 @@ import android.widget.Toast;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import es.unex.geoapp.model.LocationFrequency;
-import es.unex.geoapp.rest.IPostDataService;
+import es.unex.heatmapsc.model.LocationFrequency;
+import es.unex.heatmapsc.rest.IPostDataService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -22,22 +22,16 @@ import retrofit2.Retrofit;
  */
 
 public class LocationService extends Service {
-
-    /** Serve URL*/
-    private String BASE_URL = "";
-
     /**
      * Seconds to send
      */
-    long MILISECONDS_REFRESH = 1000;
+    long MILISECONDS_REFRESH = 60000;
 
     private Timer timer;
 
     private GPSTracker gps;
 
     PowerManager.WakeLock wakeLock;
-
-    private Retrofit retrofit;
 
     private IPostDataService rest;
 
@@ -55,14 +49,13 @@ public class LocationService extends Service {
         }
         timer = new Timer();
 
-        retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
-        rest = retrofit.create(IPostDataService.class);
+        rest = IPostDataService.retrofit.create(IPostDataService.class);
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Toast.makeText(this, "Tracking the location", Toast.LENGTH_SHORT).show();
-
         if (gps == null) {
             gps = new GPSTracker(this);
         }
@@ -102,25 +95,23 @@ public class LocationService extends Service {
     public void postGPSPosition() {
 
         if (gps.canGetLocation()) {
+            Call<String> call = rest.postLocation(new LocationFrequency(gps.getLatitude(), gps.getLongitude(), 1));
 
-
-
-            Callback<Integer> callback = new Callback<Integer>() {
-
+            call.enqueue(new Callback<String>() {
                 @Override
-                public void onResponse(Call<Integer> call, Response<Integer> response) {
-                    Log.i("HEATMAP", "Location posted");
+                public void onResponse(Call<String> call, Response<String> response) {
+                    Log.i("HEATMAP", "Location posted" );
                 }
 
                 @Override
-                public void onFailure(Call<Integer> call, Throwable t) {
+                public void onFailure(Call<String> call, Throwable t) {
                     Log.e("ERROR: ", "Error posting the location. " + t.getMessage());
                 }
-            };
+            });
 
-            rest.postLocation(new LocationFrequency(gps.getLatitude(), gps.getLongitude(), 1), callback);
         } else {
-            gps.showSettingsAlert();
+            //gps.showSettingsAlert();
+            Log.e("HEATMAP", "Can not get the location");
         }
     }
 

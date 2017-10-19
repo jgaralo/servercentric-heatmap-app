@@ -1,4 +1,4 @@
-package es.unex.geoapp.model;
+package es.unex.heatmapsc.model;
 
 import java.util.Date;
 
@@ -20,7 +20,7 @@ public class GetHeatMapMessage {
 
 
 
-    public GetHeatMapMessage(String senderId, Date begin, Date end, double latitude, double longitude, double radius) {
+    public GetHeatMapMessage(Date begin, Date end, double latitude, double longitude, double radius) {
         beginDate = begin;
         endDate = end;
         this.latitude = latitude;

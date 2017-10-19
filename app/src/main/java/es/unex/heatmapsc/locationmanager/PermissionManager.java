@@ -1,4 +1,4 @@
-package es.unex.geoapp.locationmanager;
+package es.unex.heatmapsc.locationmanager;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -7,13 +7,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
-import es.unex.geoapp.MainActivity;
-import es.unex.geoapp.R;
+import es.unex.heatmapsc.R;
 
 /**
  * Created by Javier on 18/10/2017.

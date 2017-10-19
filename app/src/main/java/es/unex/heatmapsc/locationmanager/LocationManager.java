@@ -1,20 +1,14 @@
-package es.unex.geoapp.locationmanager;
+package es.unex.heatmapsc.locationmanager;
 
 import android.graphics.PointF;
-import android.location.Location;
-import android.util.Log;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.TimeZone;
 
-import es.unex.geoapp.model.LocationFrequency;
+import es.unex.heatmapsc.model.LocationFrequency;
 
 /**
  * Created by Javier on 11/10/2017.
