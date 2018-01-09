@@ -35,7 +35,6 @@ import java.util.List;
 
 import es.unex.heatmapsc.datemanager.DatePickerFragment;
 import es.unex.heatmapsc.locationmanager.GPSTracker;
-import es.unex.heatmapsc.locationmanager.LocationManager;
 import es.unex.heatmapsc.locationmanager.LocationService;
 import es.unex.heatmapsc.locationmanager.PermissionManager;
 import es.unex.heatmapsc.model.GetHeatMapMessage;
@@ -107,6 +106,9 @@ public class MainActivity extends AppCompatActivity {
      */
     private Intent locationIntent = null;
 
+    /**
+     * Endpoints to interact with the rest services
+     */
     private IPostDataService rest;
 
 
@@ -288,8 +290,7 @@ public class MainActivity extends AppCompatActivity {
             calendar.set(Calendar.MINUTE, endMinute);
             final Date endDate = calendar.getTime();
             if(startDate.before(endDate)) {
-                /*nHelper.sendRequestLocationMessage(RADIUS, mLocation, startDate, endDate);*/
-                LocationManager.mapFinishedFlag = false;
+
 
                 final ProgressDialog progressDialog = new ProgressDialog (MainActivity.this);
                 progressDialog.setTitle("HeatMap");
@@ -332,12 +333,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void getHeatMapPositions(GetHeatMapMessage heatMapMessage) {
 
-        Call<List<LocationFrequency>> call = rest.getHeatMap(heatMapMessage);
+        Call<List<LocationFrequency>> call = rest.getHeatMap(heatMapMessage.getBeginDate(), heatMapMessage.getEndDate(), heatMapMessage.getLatitude(), heatMapMessage.getLongitude(), heatMapMessage.getRadius());
 
         call.enqueue(new Callback<List<LocationFrequency>>() {
             @Override
             public void onResponse(Call<List<LocationFrequency>> call, Response<List<LocationFrequency>> response) {
-
                 List<LocationFrequency> locations = response.body();
 
                 List<WeightedLatLng> points= new ArrayList<WeightedLatLng>();

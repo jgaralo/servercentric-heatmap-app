@@ -10,8 +10,10 @@ import android.widget.Toast;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import es.unex.heatmapsc.model.LocationBean;
 import es.unex.heatmapsc.model.LocationFrequency;
 import es.unex.heatmapsc.rest.IPostDataService;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -95,16 +97,16 @@ public class LocationService extends Service {
     public void postGPSPosition() {
 
         if (gps.canGetLocation()) {
-            Call<String> call = rest.postLocation(new LocationFrequency(gps.getLatitude(), gps.getLongitude(), 1));
+            Call<ResponseBody> call = rest.postLocation(new LocationBean(gps.getLatitude(), gps.getLongitude()));
 
-            call.enqueue(new Callback<String>() {
+            call.enqueue(new Callback<ResponseBody>() {
                 @Override
-                public void onResponse(Call<String> call, Response<String> response) {
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     Log.i("HEATMAP", "Location posted" );
                 }
 
                 @Override
-                public void onFailure(Call<String> call, Throwable t) {
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
                     Log.e("ERROR: ", "Error posting the location. " + t.getMessage());
                 }
             });
