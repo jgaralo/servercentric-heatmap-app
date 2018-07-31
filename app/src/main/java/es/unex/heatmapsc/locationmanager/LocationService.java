@@ -27,7 +27,7 @@ public class LocationService extends Service {
     /**
      * Seconds to send
      */
-    long MILISECONDS_REFRESH = 60000;
+    long MILISECONDS_REFRESH = 50000;
 
     private Timer timer;
 

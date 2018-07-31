@@ -306,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
 
                         progressDialog.dismiss();
                     }
-                }, 1000);
+                }, 20000);
             }
             else{
                 Log.e("HEATMAP", "End date is before star date");
