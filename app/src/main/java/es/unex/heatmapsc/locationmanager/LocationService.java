@@ -107,7 +107,7 @@ public class LocationService extends Service {
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.e("ERROR: ", "Error posting the location. " + t.getMessage());
+                    Log.e("HEATMAP", "Error posting the location. " + t.getMessage());
                 }
             });
 

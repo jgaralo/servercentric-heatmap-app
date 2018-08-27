@@ -9,7 +9,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.gc.materialdesign.views.ButtonRectangle;
 import com.gc.materialdesign.views.Slider;
@@ -57,10 +61,6 @@ public class MainActivity extends AppCompatActivity {
 
     // -UI ELEMENTS-
     /**
-     * Slider to select the radius value.
-     */
-    private Slider mSlider;
-    /**
      * Button to send the message.
      */
     private ButtonRectangle mButtonSend;
@@ -73,21 +73,9 @@ public class MainActivity extends AppCompatActivity {
      */
     private ButtonRectangle mButtonEndDate;
     /**
-     * TextView to show the radius of action.
-     */
-    private TextView mTextViewDistance;
-    /**
-     * Google map.
-     */
-    public GoogleMap mGoogleMap;
-    /**
      * MarkerOptions for the map.
      */
     private MarkerOptions mMarkerOptions;
-    /**
-     * Circle to draw arround the Marker with the radius.
-     */
-    private CircleOptions mCircleOptions;
     /**
      * Location used to add the marker to the map.
      */
@@ -96,10 +84,6 @@ public class MainActivity extends AppCompatActivity {
      * Marker for the icon.
      */
     private Marker mMarker;
-    /**
-     * Circle for the radius of the icon.
-     */
-    private Circle mCircle;
 
     /**
      * Tracking servie
@@ -114,15 +98,12 @@ public class MainActivity extends AppCompatActivity {
 
     private int startYear=0, startMonth, startDay, startHour, startMinute;
     private int endYear=0, endMonth, endDay, endHour, endMinute;
-    private TileOverlay tileOverlay;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        tileOverlay = null;
 
 
         if (locationIntent == null) {
@@ -133,22 +114,11 @@ public class MainActivity extends AppCompatActivity {
             startService(locationIntent);
         }
 
-        rest = IPostDataService.retrofit.create(IPostDataService.class);
+        if (mLocation == null) {
+            mLocation = new Location(android.location.LocationManager.GPS_PROVIDER);
+        }
 
-        mTextViewDistance = (TextView) findViewById(R.id.textViewDistance);
-        mSlider = (Slider) findViewById(R.id.seekBar);
-        // This Listener change the value in the distance field and draw the new circle with the given radius
-        mSlider.setOnValueChangedListener(new Slider.OnValueChangedListener() {
-            @Override
-            public void onValueChanged(int i) {
-                // Change the test in the UI
-                mTextViewDistance.setText(i + " M");
-                // Delete old circle and draw the new circle with the radius given
-                drawCircle(i);
-                // Update the global variable RADIUS with the new value
-                RADIUS = i;
-            }
-        });
+        rest = IPostDataService.retrofit.create(IPostDataService.class);
 
         mButtonSend = (ButtonRectangle) findViewById(R.id.buttonSend);
         // This Listener call sendMessage on press button with radius and message
@@ -163,86 +133,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                mGoogleMap = googleMap;
-                    getLocation();
-
-
-                mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                    @Override
-                    public void onMapClick(LatLng point) {
-                        mLocation = new Location(android.location.LocationManager.GPS_PROVIDER);
-                        mLocation.setLatitude(point.latitude);
-                        mLocation.setLongitude(point.longitude);
-                        mGoogleMap.clear();
-                        mCircleOptions = new CircleOptions().fillColor(0x5500ff00).strokeWidth(0l);
-                        mMarkerOptions = new MarkerOptions().position(point).title("Heat map center");//.icon(icon);
-                        mMarker = mGoogleMap.addMarker(mMarkerOptions);
-                        drawCircle(RADIUS);
-                    }
-                });
-            }
-        });
-
-
     }
 
-    /**
-     * Update the variable mLocation with the location using the Nimbees Location service.
-     */
-    private void getLocation() {
-        GPSTracker gpsTracker = new GPSTracker(this);
-        mLocation = gpsTracker.getLocation();
-        setUpMap();
-    }
 
-    /**
-     * Initial configuration of the map with the actual location of the user.
-     */
-    private void setUpMap() {
-        // Crear all map elements
-        mGoogleMap.clear();
-        // Set map type
-        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-        // If we cant find the location now, we call a Network Provider location
-        if (mLocation != null) {
-            // Create a LatLng object for the current location
-            LatLng latLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
-            // Show the current location in Google Map
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-            // Draw the first circle in the map
-            mCircleOptions = new CircleOptions().fillColor(0x5500ff00).strokeWidth(0l);
-            // Zoom in the Google Map
-            mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
-
-            // Zoom in the Google Map
-            //icon = BitmapDescriptorFactory.fromResource(R.drawable.logo2);
-
-            // Creation and settings of Marker Options
-            mMarkerOptions = new MarkerOptions().position(latLng).title("You are here!");//.icon(icon);
-            // Creation and addition to the map of the Marker
-            mMarker = mGoogleMap.addMarker(mMarkerOptions);
-            // set the initial map radius and draw the circle
-            drawCircle(RADIUS);
-        }
-    }
-
-    /**
-     * Change radius and icon on map when change the radius in the bar.
-     *
-     * @param radius
-     */
-    private void drawCircle(int radius) {
-        if (mCircle != null) {
-            mCircle.remove();
-        }
-        // We defined a new circle center options with location and radius
-        mCircleOptions.center(new LatLng(mLocation.getLatitude(), mLocation.getLongitude())).radius(radius); // In meters
-        // We add here to the map the new circle
-        mCircle = mGoogleMap.addCircle(mCircleOptions);
-    }
 
     public void setStartDate(int year, int month, int day){
         this.startYear=year;
@@ -270,9 +163,18 @@ public class MainActivity extends AppCompatActivity {
 
     public void getHeatMap(){
 
-        if ( tileOverlay != null){
-            tileOverlay.remove();
-        }
+
+        EditText editLatitude = (EditText)findViewById(R.id.editLatitude);
+
+
+        mLocation.setLatitude(Double.parseDouble(editLatitude.getText().toString()));
+
+        EditText editLongitude = (EditText)findViewById(R.id.editLongitude);
+        mLocation.setLongitude(Double.parseDouble(editLongitude.getText().toString()));
+
+        EditText editRadius = (EditText)findViewById(R.id.editRadius);
+        RADIUS = Integer.parseInt(editRadius.getText().toString());
+
         if(endYear!=0 && startYear!=0){
             Calendar calendar = Calendar.getInstance();
             calendar.clear();
@@ -301,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     public void run() {
+
 
                         getHeatMapPositions (new GetHeatMapMessage(startDate, endDate, mLocation.getLatitude(), mLocation.getLongitude(), RADIUS));
 
@@ -340,18 +243,47 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<List<LocationFrequency>> call, Response<List<LocationFrequency>> response) {
                 List<LocationFrequency> locations = response.body();
 
-                List<WeightedLatLng> points= new ArrayList<WeightedLatLng>();
+                Log.w("HEATMAP: ", "Message received. Num. Points: " + locations.size());
+
+                TableLayout inflate = (TableLayout) MainActivity.this.findViewById(R.id.tblLocations);
+                TableRow row;
+                TextView col1, col2, col3;
+
+                row = new TableRow(MainActivity.this);
+                col1 = new TextView(MainActivity.this);
+                col1.setText("Latitude"+ "      ");
+                row.addView(col1);
+
+                col2 = new TextView(MainActivity.this);
+                col2.setText("Longitude "+ "      ");
+                row.addView(col2);
+
+                col3 = new TextView(MainActivity.this);
+                col3.setText("Frequency "+ "      ");
+                row.addView(col3);
+
+                inflate.addView(row);
+
+
                 for(LocationFrequency location:locations){
-                    points.add(new WeightedLatLng(new LatLng(location.getLatitude(), location.getLongitude()),location.getFrequency()));
-                }
-                if(points.size()>0) {
-                    HeatmapTileProvider mProvider = new HeatmapTileProvider.Builder()
-                            .weightedData(points)
-                            .build();
-                    tileOverlay = MainActivity.this.mGoogleMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
-                    if (mCircle != null) {
-                        mCircle.remove();
-                    }
+
+                    Log.w("HEATMAP: ", "Point. Latitude " + location.getLatitude() + " Longitude: " + location.getLongitude() + "Frequency: " +location.getFrequency());
+
+                    row = new TableRow(MainActivity.this);
+                    col1 = new TextView(MainActivity.this);
+                    col1.setText(location.getLatitude().toString() + "      ");
+                    row.addView(col1);
+
+                    col2 = new TextView(MainActivity.this);
+                    col2.setText(location.getLongitude().toString()+ "      ");
+                    row.addView(col2);
+
+                    col3 = new TextView(MainActivity.this);
+                    col3.setText(location.getFrequency().toString());
+                    row.addView(col3);
+
+                    inflate.addView(row);
+
                 }
 
             }
