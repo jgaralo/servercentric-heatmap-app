@@ -1,10 +1,15 @@
 package es.unex.heatmapsc;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -112,8 +117,8 @@ public class MainActivity extends AppCompatActivity {
     private IPostDataService rest;
 
 
-    private int startYear=0, startMonth, startDay, startHour, startMinute;
-    private int endYear=0, endMonth, endDay, endHour, endMinute;
+    private int startYear = 0, startMonth, startDay, startHour, startMinute;
+    private int endYear = 0, endMonth, endDay, endHour, endMinute;
     private TileOverlay tileOverlay;
 
 
@@ -129,8 +134,12 @@ public class MainActivity extends AppCompatActivity {
             locationIntent = new Intent(this, LocationService.class);
         }
         // check location permission
-        if (PermissionManager.checkPermissions(this, MainActivity.this)){
+        if (PermissionManager.checkPermissions(this, MainActivity.this)) {
             startService(locationIntent);
+        }
+
+        if (mLocation == null) {
+            mLocation = new Location(android.location.LocationManager.GPS_PROVIDER);
         }
 
         rest = IPostDataService.retrofit.create(IPostDataService.class);
@@ -167,7 +176,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onMapReady(GoogleMap googleMap) {
                 mGoogleMap = googleMap;
-                    getLocation();
+                setUpMap();
+                //getLocation();
 
 
                 mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -198,6 +208,16 @@ public class MainActivity extends AppCompatActivity {
         setUpMap();
     }
 
+    /*Callback result of permissions check*/
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (PermissionManager.onRequestPermissionsResult(requestCode, permissions, grantResults, this, getApplicationContext())) {
+            startService(locationIntent);
+        }
+    }
+
     /**
      * Initial configuration of the map with the actual location of the user.
      */
@@ -207,6 +227,31 @@ public class MainActivity extends AppCompatActivity {
         // Set map type
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         // If we cant find the location now, we call a Network Provider location
+        //addLocation();
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(broadcastReceiver, new IntentFilter("NOW"));
+    }
+
+    /*Broadcast to receive location for adding in the map*/
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            Log.d("LOCATION", intent.getDoubleExtra("lat", 0) + " : " + intent.getDoubleExtra("long", 0));
+            mLocation.setLatitude(intent.getDoubleExtra("lat", 0));
+            mLocation.setLongitude(intent.getDoubleExtra("long", 0));
+            addLocation();
+
+        }
+    };
+
+    /*Add the red marker with the location*/
+    private void addLocation() {
         if (mLocation != null) {
             // Create a LatLng object for the current location
             LatLng latLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
@@ -244,36 +289,35 @@ public class MainActivity extends AppCompatActivity {
         mCircle = mGoogleMap.addCircle(mCircleOptions);
     }
 
-    public void setStartDate(int year, int month, int day){
-        this.startYear=year;
-        this.startMonth=month;
-        this.startDay=day;
+    public void setStartDate(int year, int month, int day) {
+        this.startYear = year;
+        this.startMonth = month;
+        this.startDay = day;
     }
 
-    public void setEndDate(int year, int month, int day){
-        this.endYear=year;
-        this.endMonth=month;
-        this.endDay=day;
+    public void setEndDate(int year, int month, int day) {
+        this.endYear = year;
+        this.endMonth = month;
+        this.endDay = day;
     }
 
-    public void setStartTime(int hour, int minute){
-        this.startHour=hour;
-        this.startMinute=minute;
+    public void setStartTime(int hour, int minute) {
+        this.startHour = hour;
+        this.startMinute = minute;
     }
 
-    public void setEndTime(int hour, int minute){
-        this.endHour=hour;
-        this.endMinute=minute;
+    public void setEndTime(int hour, int minute) {
+        this.endHour = hour;
+        this.endMinute = minute;
     }
 
 
+    public void getHeatMap() {
 
-    public void getHeatMap(){
-
-        if ( tileOverlay != null){
+        if (tileOverlay != null) {
             tileOverlay.remove();
         }
-        if(endYear!=0 && startYear!=0){
+        if (endYear != 0 && startYear != 0) {
             Calendar calendar = Calendar.getInstance();
             calendar.clear();
             calendar.set(Calendar.YEAR, startYear);
@@ -289,10 +333,10 @@ public class MainActivity extends AppCompatActivity {
             calendar.set(Calendar.HOUR_OF_DAY, endHour);
             calendar.set(Calendar.MINUTE, endMinute);
             final Date endDate = calendar.getTime();
-            if(startDate.before(endDate)) {
+            if (startDate.before(endDate)) {
 
 
-                final ProgressDialog progressDialog = new ProgressDialog (MainActivity.this);
+                final ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
                 progressDialog.setTitle("HeatMap");
                 progressDialog.setMessage("Getting users' locations..."); // Setting Message
                 progressDialog.setCancelable(false);
@@ -302,15 +346,14 @@ public class MainActivity extends AppCompatActivity {
                 handler.postDelayed(new Runnable() {
                     public void run() {
 
-                        getHeatMapPositions (new GetHeatMapMessage(startDate, endDate, mLocation.getLatitude(), mLocation.getLongitude(), RADIUS));
+                        getHeatMapPositions(new GetHeatMapMessage(startDate, endDate, mLocation.getLatitude(), mLocation.getLongitude(), RADIUS));
 
                         progressDialog.dismiss();
                     }
                 }, 20000);
-            }
-            else{
+            } else {
                 Log.e("HEATMAP", "End date is before star date");
-                SnackBar snackbar = new SnackBar(MainActivity.this, "Start date should be before end date", "ok",new View.OnClickListener() {
+                SnackBar snackbar = new SnackBar(MainActivity.this, "Start date should be before end date", "ok", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         // Handle user action
@@ -318,10 +361,9 @@ public class MainActivity extends AppCompatActivity {
                 });
                 snackbar.show();
             }
-        }
-        else{
+        } else {
             Log.e("HEATMAP", "No dates");
-            SnackBar snackbar = new SnackBar(MainActivity.this, "Please select the dates first", "ok",new View.OnClickListener() {
+            SnackBar snackbar = new SnackBar(MainActivity.this, "Please select the dates first", "ok", new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     // Handle user action
@@ -338,13 +380,20 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<List<LocationFrequency>>() {
             @Override
             public void onResponse(Call<List<LocationFrequency>> call, Response<List<LocationFrequency>> response) {
-                List<LocationFrequency> locations = response.body();
 
-                List<WeightedLatLng> points= new ArrayList<WeightedLatLng>();
-                for(LocationFrequency location:locations){
-                    points.add(new WeightedLatLng(new LatLng(location.getLatitude(), location.getLongitude()),location.getFrequency()));
+
+                List<LocationFrequency> locations = response.body();
+                Log.e("HEATMAP: ", "Locations received " + response.body().size());
+
+//                for(int i=0; i<locations.size(); i++){
+//                    Log.i("Locations: ",locations.toString());
+//                }
+
+                List<WeightedLatLng> points = new ArrayList<WeightedLatLng>();
+                for (LocationFrequency location : locations) {
+                    points.add(new WeightedLatLng(new LatLng(location.getLatitude(), location.getLongitude()), location.getFrequency()));
                 }
-                if(points.size()>0) {
+                if (points.size() > 0) {
                     HeatmapTileProvider mProvider = new HeatmapTileProvider.Builder()
                             .weightedData(points)
                             .build();

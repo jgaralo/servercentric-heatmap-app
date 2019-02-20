@@ -46,7 +46,7 @@ public interface IPostDataService {
 
 
     public static final Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl("https://vgvnaqc8j8.execute-api.us-east-1.amazonaws.com")
+            .baseUrl("https://vi2qblkq7c.execute-api.eu-west-1.amazonaws.com")
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build();
 
