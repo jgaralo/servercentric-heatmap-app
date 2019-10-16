@@ -190,6 +190,8 @@ public class MainActivity extends AppCompatActivity {
                         mCircleOptions = new CircleOptions().fillColor(0x5500ff00).strokeWidth(0l);
                         mMarkerOptions = new MarkerOptions().position(point).title("Heat map center");//.icon(icon);
                         mMarker = mGoogleMap.addMarker(mMarkerOptions);
+                        mGoogleMap.setMyLocationEnabled(true);
+                        mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
                         drawCircle(RADIUS);
                     }
                 });
@@ -256,11 +258,11 @@ public class MainActivity extends AppCompatActivity {
             // Create a LatLng object for the current location
             LatLng latLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
             // Show the current location in Google Map
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,15));
             // Draw the first circle in the map
             mCircleOptions = new CircleOptions().fillColor(0x5500ff00).strokeWidth(0l);
             // Zoom in the Google Map
-            mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+            //mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
 
             // Zoom in the Google Map
             //icon = BitmapDescriptorFactory.fromResource(R.drawable.logo2);
